@@ -1,0 +1,9 @@
+1;Casual;2151
+1;Noob;322
+1;Pro;7267
+2;Casual;5524
+2;Noob;382
+2;Pro;25978
+3;Casual;18048
+3;Noob;623
+3;Pro;25718

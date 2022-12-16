@@ -1,0 +1,142 @@
+-----------------------
+HOW TO START THE GAME:|
+-----------------------
+1. Run main.cpp in Qt or a command prompt(Or the way you prefer).
+2. On the left bottom corner, you can choose a difficulty between easy to hard. The harder the difficulty, the faster is the game speed.
+3. If you want to have your name on the leaderboards:
+  i) The checkbox "Save points to leaderboards"
+  ii) Write any name on the username textbox.
+    - NOTE! If you leave "Username" empty, your score will not be saved.
+    - Scores will be saved only when the game is over. (If you quit, the score will not be saved!)
+4. When you are ready to play, just press "start new game" button on the left bottom corner.
+5. You can quit the game at any point in the game by pressing the button "Close the game".
+--------------
+HOW TO PLAY: |
+--------------
+There are seven different shapes called tetrominoes. Your goal is to move and rotate the pieces surviving as long as possible and gaining points by clearing full rows.
+You can move a piece on the game area by pressing control buttons under the title "Controls". You can also move and rotate pieces by keyboard keys W, A, S, and D
+Button "Rotate" or key "W": The piece tries to rotate 90 degrees clockwise around its center block. The piece will not rotate if there is a wall, floor, or another block in the way.
+Button "Left" or key "A": Moves the piece on the board one block to the left. If a wall or another block is in the way, the piece will not move that way.
+Button "Right" or key "D": Moves the piece on the board one block to the right. If a wall or another block is in the way, the piece will not move that way.
+Button "Down" or key "S": Moves the piece on the board downwards. If space is occupied with a stationary block the tetromino will freeze in the current location. The piece will also freeze if it is trying to move below the game area. After freezing the piece, it cannot be moved, and shortly after the next piece will be created.
+The game will end if the next piece cannot fit in the spawning location.
+After "game over" you can quit the game or play a new game. You can change the difficulty and opt-in or out from saving from the leaderboards.
+---------------
+TROUBLESHOOT: |
+---------------
+The screen is white or leaderboards are empty:
+  -Your build directory is different than the source. Solution:
+    - Move the images folder and leaderboards.txt to the build directory OR
+    - disable shadow builds in Qt
+There is no "Close the game" button or another button/object:
+  - Please resize the game window to a bigger size. It might be hidden
+---------
+POINTS: |
+---------
+You can get points in three ways:
+1. On every second survived you gain one point to your score.
+2. When the piece moves down(by automatically or by your command), you get points depending on the difficulty level you have selected at the beginning of the game:
+  EASY: +1 Point on each movement down
+  NORMAL: +2 Points on each movement down
+  HARD: +3 Points on each movement down.
+3. By clearing rows(Depends on the difficulty you have selected):
+  Points are given as follows (rows: points)
+  EASY:   1:+100, 2:+400,  3:+900,  4:+1600
+  NORMAL: 1:+400, 2:+1600,  3:+3600, 4:+6400
+  HARD:   1:+900, 2:+3600, 3:+8100, 4:+14400
+These scores will be updated on every point gained under the "Points" title.
+---------------------------------------------------------
+(All Minimal and extra features explained in detail below)
+
+Minimal requirements:
+Board is empty at the start of the game.
+- MainWindow class first creates the game area then clearBoard function fills all the vector locations with null pointers. It also prints every location with an empty.png image.
+
+At least 4 shapes:
+- I made all 7. Take a look at "Extra features"
+
+Tetromino will move downwards automatically(Also at command):
+- The piece will be moved downwards automatically on every gameSpeed timeout.
+  EASY: Piece moves down on every 1.00 second.
+  NORMAL: Piece moves down on every 0.50 seconds.
+  HARD: Piece moves down on every 0.25 seconds.
+- The piece can also be moved by a command:
+- Key "S" pressed or button "Down" pressed.
+
+Falling tetrominoes can be moved sideways:
+- Moving left by pressing the "Left" button or pressing the "A" key.
+- Moving right by pressing the "Right" button or pressing D key.
+- Function MovePieces searches if the shape is movable to the direction on the grid. Every single block in tetromino must be movable to the given direction(No wall or immovable block in the way)(target block can have a movable square in it, same that will be moved out of the way). If false the piece will not even try to move to the direction given. If true moveAlgorithm will move the pieces one by one only if the target block is nullpointer. It might take a few iteration rounds if tetrominoes square is in the way but eventually, all of the pieces will be moved. The new location will be updated to SmallSquare x and y coordinates and smaller locations_ vector that has movable pieces coordinates and updating movement to the screen by printSquare().
+
+Tetromino must stop(freeze) on the floor or immovable shape:
+- Function areControllableMovable on direction down (dy = 1) it first searches if below the piece, that it is not going below the floor(isWall()). If it is, the piece freezes and cannot be moved in any direction anymore. If false, then isNextMovableOrNull() searches if the next place is eventually free(nullpointer). If not, it freezes the blocks and it can not be moved anymore.
+
+At game over the user will receive a message:
+- If a new tetromino doesn't fit in the game board, it is gameOver()
+- The question window will pop up and it asks if you want to play again. If no, the game quits, if yes, a new game will be initialized.
+
+Game details:
+The game has two classes:
+1. Massive MainWindows that handles all game-related functions.
+- Has spawning location coordinates (COORDS) map for movement direction coordinates (DIRECTIONS)
+- All the buttons are named with underscores so slots functions look alike. Other functions and widget names are named with cameCase fashion.
+- Buttons labels etc. Will be enabled or disabled depending on the game moment.
+NOTE! When the player wants to play a new game after game over, the points from the previous game will stay there after initialization. This is intentional and the score is zero in-game details and will be updated when the game starts. This is for comparison for the player what score she/he got previously and maybe getting a better score.
+2. SmallSquare class that has details of the one square on the board(location, can be moved, rotation number 0 to 3, one of 7 type info and the index number: The numerical order in block creating).
+- It has functions for controlling the piece and big rotation matrix (ROTATION_INFO) for rotation target coordinates.
+- My original plan was to move all marked (movable) but moving was inefficient because for every movement the game would search all movables in the whole board. Now it is used only when the row is cleared. I have added vector locations that have only coordinates for the spawned shape that updates on every move. More efficient and robust.
+
+-------------------------
+
+Extra features:
+
+All 7 tetrominoes in the game:
+- In mainwindow.hh (lines 84-99) is located constant COORDS that has the spawning coordinates of every single square in the shape. Function createShape chooses random integer between 0 to 6 which is also the type and the index of the tetromino in COORDS. The function creates four SmallSquare class objects in those coordinates.
+
+Tetromino can be rotated:
+- Using key "W" or button "Rotate", piece rotates 90 degrees clockwise if it can.
+- Checks with isNextMovableOrNull() if target block is in the game board and the target block is free form immovable block(target has nullpointer or movable block)
+- If true, it moves pieces one by one with moveAlgorithm() and updates the screen with the rotated block. Locations_ will also be updated with the rotation.
+- NOTE1!: The vector parameter is given empty because every single block has a different rotation target coordinates. (ROTATION_INFO in SmallSquare)
+- NOTE2!: ROTATION_INFO vector seems a clumsy way to do the rotating but this is the only way I can rotate the pieces. Maybe a matrix operation would be more efficient but I couldn't do that with current data structures.
+
+Tetromino can be squished to a tiny space before freezing:
+- This feature can be tested easily if gamespeed is stopped and the piece has a free movement. Comment out for example line 383
+- I understood this as follows: The piece can be moved sideways as many times as the player can move the piece between the timeouts.
+
+Full rows will be cleared:
+- On every piece frozen, the game will check if a row is full of blocks. If it is, clearRow() will delete and replace Squares with nullpointers. setRowsActive sets all the blocks above cleared row movable. Then moveAlgorithm moves all ClearRowLocations_ down by one. Freeze all, game speed gets faster and according to cleared rows, the player gets more points for more rows and with harder difficulty.
+
+The game has a timer for the time used:
+- The game uses LCDs showing current time used in the game
+- On game over the used time can be seen frozen before quitting or starting a new game.
+- Using a timer for the LCD clock time. (update_time)
+
+The game has points:
+- Points are saved to points_.
+- Function addPoints adds and updates points in the game in-game details and visually.
+- Please look at the POINTS section above for how to get points and how much.
+- slot update_time adds one point per every second
+- on_down_button_clicked() gives points for difficulty
+- checkFullRows() gives points depending on difficulty and rows cleared.
+
+The game has different difficulty levels:
+- The player can choose the difficulty at the beginning bottom left, one of the radio buttons.
+- When starting the game difficulty value is saved to the game details (difficulty_) it will be used on point counting and for game starting speed (DIFFMAP)
+
+The game speed speeds up automatically:
+- On every row cleared successfully the game speed shortens by 10 ms from the previous value so hard difficulty goes inhuman pretty fast.
+
+The game can be restarted after the game is over:
+- If the player presses yes on the game over pop up question, the game will clear the board freeze/unfreeze buttons zero timers and score.
+- Username and checkmark will be the same after initialization if the player wants to beat the previous score and get higher on the leaderboards.
+
+The game has a leaderboard:
+- Leaderboards can be found in the project files called leaderboards.txt.
+- If it doesn't exist the game will create a new empty one on startup. Player names will be displayed empty with a score of 0.
+- The leaderboards can fit 3 top players on the UI and have 3 default scores you can try to beat.
+There is a place for every difficulty because points get from a different difficulty differs greatly.
+- All the lines with a correct format: int difficulty;string name;int score will be staved in scores_ map.
+- if the player has opt-in in adding itself to the leaderboards if the score is great enough, it will be updated to the game list. Also, any incorrect lines will be discarded because they will not end up in the scores_ because then the file will be rewritten with scores data(Player data might just update score to better one) or with a new player score.
+- NOTE1! I am unable to do any better solution by inserting the best scores data to the game labels. That's why 3 similar functions are filling certain labels with data.
+- NOTE2! It is not intended that the user could mess up or edit with the leaderboards file but functions take care of that the correct top results will display in the game and incorrect ones will be discarded form the file on writing.
